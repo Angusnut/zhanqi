@@ -116,7 +116,43 @@ public:
 	*/
 	bool blend_pos(position p);
 	bool unblend_pos(position p);
+	bool a_blend_pos(position p);
+	bool a_unblend_pos(position p);
 	GamePlayLayer* get_layer();
+
+	/*is the pos of the world empty
+	*@param: position
+	*@return: boolean, true for yes, false for no or not a valid position
+	*/
+	bool is_pos_empty(position p);
+
+	/*get the pos of a hero can move
+	*@param: position
+	*@return: vector contains all the position
+	*/
+	vector<position> get_movable_pos(position p);
+
+	/*search the pos of a rider
+	*@param: position, vector to be recorded
+	*@return: 
+	*/
+	void search_pos(position p, vector<position>& , int depth = 2, bool init = false);
+	void search_a_pos(position p, vector<position>&, int depth = 2, bool init = false);
+
+	/*get the pos of a hero can attack
+	*@param: position
+	*@return: vector contains all the position
+	*/
+	vector<position> get_attackable_pos(position p);
+
+
+	/*attack
+	*@param: position start and end
+	*@return: 
+	*/
+	bool attack(position ps, position pe);
+	int get_width();
+	int get_height();
 	//ofstream of;
 private:
 	vector< vector<Grid> > grids;
@@ -125,6 +161,8 @@ private:
 	int width_diff, height_diff;
 	GamePlayLayer* gplayer;
 	map<position, Sprite* > mapper;
+	map<position, Sprite* > a_mapper;
+	map<int, BloodProgress* > bloods;
 };
 
 #endif

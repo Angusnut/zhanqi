@@ -36,8 +36,7 @@ G_Map::~G_Map() {
 	for (int i = 0; i < grids.size(); i++) {
 		grids[i].clear();
 	}
-	//	gplayer->~GamePlayLayer();
-	//	delete gplayer;
+	gplayer->removeFromParentAndCleanup(true);
 }
 
 bool G_Map::is_valid(Point p) {
@@ -83,10 +82,13 @@ Point G_Map::get_center_of_pos(position p) {
 }
 
 GameSprite* G_Map::get_hero_on_pos(position p) {
+	if (!is_valid_pos(p)) {
+		return new GameSprite();
+	}
 	GameSprite* tmp = grids[p.y][p.x].get_hero();
 	return tmp;
 }
-
+bool tflag = false;
 bool G_Map::put_hero_on_pos(GameSprite* h, position p) {
 	if (!is_valid_pos(p)) {
 		//cout << "not a valid pos!" << endl;
@@ -94,9 +96,23 @@ bool G_Map::put_hero_on_pos(GameSprite* h, position p) {
 		return false;
 	}
 	grids[p.y][p.x].put(h);
+	h->setName(h->get_type().get_name());
 	gplayer->addChild(h);
 	h->setPosition(((double)p.x + 0.5) * gwid + width_diff, ((double)p.y + 0.5) * ghei + height_diff);
 	h->get_type().set_position(p.x, p.y);
+	BloodProgress* blood = new BloodProgress();
+	blood->setBackgroundTexture("bloodback.png");
+	if (h->getTag() >= 10) {
+		blood->setForegroundTexture("bloodfore2p.png");
+	}
+	else {
+		blood->setForegroundTexture("bloodfore.png");
+	}
+	blood->setTotalProgress(h->get_type().get_life());
+	blood->setCurrentProgress(h->get_type().get_life());
+	blood->setPosition(h->getPositionX(), h->getPositionY() + 30);
+	gplayer->addChild(blood);
+	bloods.insert(pair<int, BloodProgress* > (h->getTag(), blood));
 	return true;
 }
 
@@ -116,10 +132,24 @@ bool G_Map::move(position ps, position pe) {
 		cout << "already hero there!" << endl;
 		return false;
 	}
-	grids[ps.y][ps.x].get_hero()->setPosition(get_center_of_pos(pe));
-	
-	grids[pe.y][pe.x].put(grids[ps.y][ps.x].get_hero());
+	GameSprite* hero = grids[ps.y][ps.x].get_hero();
+	hero->setPosition(get_center_of_pos(pe));
+	bloods[hero->getTag()]->setPosition(hero->getPositionX(), hero->getPositionY() + 30);
+//	hero->get_blood()->setPosition(get_center_of_pos(pe).x, get_center_of_pos(pe).y + 40);
+	grids[pe.y][pe.x].put(hero);
 	grids[ps.y][ps.x].remove();
+	if (get_terrain(pe) == "ground") {//-----ground, knight have been powered up
+		hero->change_attribute(1);
+	}
+	if (get_terrain(pe) == "grass") {//-------grass, soldier have been powered up
+		hero->change_attribute(2);
+	}
+	if (get_terrain(pe) == "mountain") {//-------mountain, archer have been powered up, knight down
+		hero->change_attribute(3);
+	}
+	if (get_terrain(pe) == "river") {//-------river, soldier have been powered down, knight down
+		hero->change_attribute(4);
+	}
 	return true;
 }
 
@@ -148,23 +178,21 @@ std::string G_Map::get_terrain(position p) {
 	Value gid_value = gplayer->pTileMap->getPropertiesForGID(gid);
 	ValueMap ValueMap = gid_value.asValueMap();
 	if (ValueMap["terrain"].asInt() == 1){
-		CCLOG("it's river");
+		//CCLOG("it's river");
 		str = "river";
 	}
 	else if (ValueMap["terrain"].asInt() == 2){
-		CCLOG("it's mountain");
+		//CCLOG("it's mountain");
 		str = "mountain";
 	}
 	else if (ValueMap["terrain"].asInt() == 3){
-		CCLOG("it's brick");
+		//CCLOG("it's brick");
 		str = "brick";
 	}
 	else if (ValueMap["terrain"].asInt() == 4){
-		CCLOG("it's grass");
 		str = "grass";
 	}
 	else if (ValueMap["terrain"].asInt() == 5){
-		CCLOG("it's ground");
 		str = "ground";
 	}
 	else
@@ -247,7 +275,6 @@ bool G_Map::blend_pos(position p) {
 	
 	map<position, Sprite*>::iterator iter = mapper.find(p);
 	if (iter != mapper.end()) {
-		CCLOG("I FUCK YOU");
 		mapper[p]->setVisible(true);
 	}
 	else {
@@ -257,7 +284,6 @@ bool G_Map::blend_pos(position p) {
 		BlendFunc cbl = { GL_DST_COLOR, GL_ONE };
 		n_sprite->setBlendFunc(cbl);
 		gplayer->addChild(n_sprite, 2);
-		CCLOG("FUCK");
 		mapper.insert(pair<position, Sprite* >(p, n_sprite));
 		mapper[p]->setVisible(true);
 	}
@@ -278,6 +304,42 @@ bool G_Map::unblend_pos(position p) {
 	}
 }
 
+bool G_Map::a_blend_pos(position p) {
+	if (!is_valid_pos(p)) {
+		return false;
+	}
+
+	map<position, Sprite*>::iterator iter = a_mapper.find(p);
+	if (iter != a_mapper.end()) {
+		a_mapper[p]->setVisible(true);
+	}
+	else {
+		Sprite* n_sprite = Sprite::create("ablend.png");
+		gplayer->blends.push_back(n_sprite);
+		n_sprite->setPosition(get_center_of_pos(p));
+		BlendFunc cbl = { GL_DST_COLOR, GL_ONE };
+		n_sprite->setBlendFunc(cbl);
+		gplayer->addChild(n_sprite, 2);
+		a_mapper.insert(pair<position, Sprite* >(p, n_sprite));
+		a_mapper[p]->setVisible(true);
+	}
+	return true;
+}
+
+bool G_Map::a_unblend_pos(position p) {
+	if (!is_valid_pos(p)) {
+		return false;
+	}
+	map<position, Sprite*>::iterator iter = a_mapper.find(p);
+	if (iter != a_mapper.end()) {
+		a_mapper[p]->setVisible(false);
+		return true;
+	}
+	else {
+		return false;
+	}
+}
+
 GamePlayLayer* G_Map::get_layer() {
 	return gplayer;
 }
@@ -286,4 +348,126 @@ GamePlayLayer* G_Map::get_layer() {
 vector< vector<Grid> > G_Map:: get_grids(){
 
 	return grids;
+}
+
+bool G_Map::is_pos_empty(position p) {
+	if (!is_valid_pos(p)) {
+		CCLOG("not a valid pos");
+		return false;
+	}
+	return grids[p.y][p.x].is_empty();
+}
+
+vector<position> G_Map::get_movable_pos(position p) {
+	vector<position> answer;
+	if (is_pos_empty(p)) {
+		CCLOG("No Hero Here");
+		return answer;
+	}
+	GameSprite* hero = get_hero_on_pos(p);
+	if (hero->get_type().get_fight_type() == 2) {
+		search_pos(p, answer);
+		return answer;
+	}
+	else {
+		search_pos(p, answer, 1);
+		return answer;
+	}
+}
+
+void G_Map::search_pos(position p, vector<position>& answer, int depth, bool init) {
+	if (depth == -1) {
+		return;
+	}
+	if (p == position(-1, -1)){
+		return;
+	}
+	if (get_terrain(p) == "brick") {
+		return;
+	}
+	if (!is_pos_empty(p) && init) {
+		return;
+	}
+	answer.push_back(p);
+	search_pos(get_up_pos(p), answer, depth - 1, true);
+	search_pos(get_down_pos(p), answer, depth - 1, true);
+	search_pos(get_left_pos(p), answer, depth - 1, true);
+	search_pos(get_right_pos(p), answer, depth - 1, true);
+}
+
+void G_Map::search_a_pos(position p, vector<position>& answer, int depth, bool init) {
+	if (depth == -1) {
+		return;
+	}
+	if (p == position(-1, -1)){
+		return;
+	}
+	answer.push_back(p);
+	search_a_pos(get_up_pos(p), answer, depth - 1, true);
+	search_a_pos(get_down_pos(p), answer, depth - 1, true);
+	search_a_pos(get_left_pos(p), answer, depth - 1, true);
+	search_a_pos(get_right_pos(p), answer, depth - 1, true);
+}
+
+vector<position> G_Map::get_attackable_pos(position p) {
+	vector<position> answer;
+	if (is_pos_empty(p)) {
+		CCLOG("No Hero Here");
+		return answer;
+	}
+	GameSprite* hero = get_hero_on_pos(p);
+	if (hero->get_type().get_fight_type() == 3) {
+		search_a_pos(p, answer);
+		return answer;
+	}
+	else {
+		search_a_pos(p, answer, 1);
+		return answer;
+	}
+}
+
+bool G_Map::attack(position ps, position pe) {
+	if (!is_valid_pos(ps) || !is_valid_pos(pe)) {
+		return false;
+	}
+	if (is_pos_empty(ps) || is_pos_empty(pe)) {
+		return false;
+	}
+    int flag;
+    if (ps.y > pe.y){
+        flag = 0;              //¹¥ÉÏ·ÀÏÂ
+    }
+    else if(ps.x > pe.x){
+        flag = 1;              //¹¥ÓÒ·À×ó
+    }
+    else if (ps.x < pe.x){
+        flag = 2;              //¹¥×ó·ÀÓÒ
+    }
+    else {
+        flag = 3;              //¹¥ÏÂ·ÀÉÏ
+    }
+	GameSprite* ahero = get_hero_on_pos(ps);
+	GameSprite* dhero = get_hero_on_pos(pe);
+	int damage = ahero->get_type().get_D_attack() - 0.2 * dhero->get_type().get_D_defense();
+	dhero->get_type().change_life(dhero->get_type().get_life() - damage);
+	ahero->get_type().change_magic(dhero->get_type().get_magic() * 0.9);
+    ahero->attackAnimation(ahero->getTag() / 10 + 1, flag);
+	bloods[dhero->getTag()]->setCurrentProgress(dhero->get_type().get_life());
+	if (dhero->get_type().get_life() <= 0) {
+		dhero->deadAnimation();
+		CCLOG("DEAD!!!!");
+		//Sleep(1000);
+		bloods[dhero->getTag()]->setVisible(false);
+		CCLOG("REMOVE!!!!");
+		remove(pe);
+	}
+	return true;
+}
+
+int G_Map::get_width() {
+	return cols;
+}
+
+int G_Map::get_height() {
+	return rows;
 }

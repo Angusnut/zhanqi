@@ -74,8 +74,6 @@ bool HelloWorld::init()
     auto *sprite4_1 = CCSprite::create(path + "exitGame_selected.png");
     sprite4_1->setScale(1.3f, 1.3f);
 
-
-
     auto *newGame = CCMenuItemSprite::create(sprite1, sprite1_1, sprite1, this, menu_selector(HelloWorld::newFun));
     auto *loadGame = CCMenuItemSprite::create(sprite2, sprite2_1, sprite2, this, menu_selector(HelloWorld::loadFun));
     auto *helpGame = CCMenuItemSprite::create(sprite3, sprite3_1, sprite3, this, menu_selector(HelloWorld::helpFun));

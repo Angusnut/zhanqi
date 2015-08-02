@@ -30,6 +30,7 @@ bool ChooseMap::init()
         return false;
     }
     CCNotificationCenter::sharedNotificationCenter()->addObserver(this, callfuncO_selector(ChooseMap::getArray), "2PMessage", NULL);
+    CCNotificationCenter::sharedNotificationCenter()->addObserver(this, callfuncO_selector(ChooseMap::storymode), "storyMessage", NULL);
     string path = "images/newGame/";
 	char *mapName[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling"};
     Size visibleSize = Director::getInstance()->getVisibleSize();
@@ -110,6 +111,9 @@ void ChooseMap::getArray(CCObject* obj){
     CCString *para = static_cast<CCString*>(obj);
     s = para->getCString();
 }
+void ChooseMap::storymode(CCObject* obj){
+    s = "";
+}
 void ChooseMap::startGame(Ref* pSender){
 	SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav",false);//开始播放背景音效，false表示不循环
     int count = 0;
@@ -140,15 +144,22 @@ void ChooseMap::startGame(Ref* pSender){
 void ChooseMap::backto(Ref* pSender){
 	SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav",false);//开始播放背景音效，false表示不循环
     CCNotificationCenter::sharedNotificationCenter()->purgeNotificationCenter();
-    auto scene = ChooseCharacter_2P::createScene();
-    string substr = "";
-    for (int i = 0; i < 10; i++){
-        substr += s[i];
+    if (s.size() > 1){
+        auto scene = ChooseCharacter_2P::createScene();
+        string substr = "";
+        for (int i = 0; i < 10; i++){
+            substr += s[i];
+        }
+        CCString *str = CCString::create(substr);
+        CCNotificationCenter::sharedNotificationCenter()->postNotification("Message", str);
+        // run
+        Director::getInstance()->replaceScene(scene);
     }
-    CCString *str = CCString::create(substr);
-    CCNotificationCenter::sharedNotificationCenter()->postNotification("Message", str);
-    // run
-    Director::getInstance()->replaceScene(scene);
+    else {
+        auto scene = ChooseMap::createScene();
+        // run
+        Director::getInstance()->replaceScene(scene);
+    }
 }
 
 void ChooseMap::menuCloseCallback(Ref* pSender)

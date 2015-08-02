@@ -50,7 +50,7 @@ bool NewGame::init()
     storymode->setScale(1.4f, 1.4f);
     auto* storymode_selected = CCSprite::create(path + "story_mode_selected.png");
     storymode_selected ->setScale(1.4f, 1.4f);
-    auto *storyMode = CCMenuItemSprite::create(storymode, storymode_selected, storymode, this, menu_selector(NewGame::backFun));
+    auto *storyMode = CCMenuItemSprite::create(storymode, storymode_selected, storymode, this, menu_selector(NewGame::storyFun));
     storyMode->setPosition(ccp(visibleSize.width / 2 - 20, visibleSize.height - 400));
     //退出
     auto *back = CCSprite::create("back.png");
@@ -79,6 +79,13 @@ void NewGame::fightFun(Ref* pSender){
     auto scene = ChooseCharacter::createScene();
     Director::getInstance()->replaceScene(scene);
 }
+void NewGame::storyFun(Ref* pSender){
+    SimpleAudioEngine::sharedEngine()->preloadEffect("anniu.wav");
+    SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
+    auto scene = ChooseMap::createScene();
+    CCNotificationCenter::sharedNotificationCenter()->postNotification("storyMessage", NULL);
+    Director::getInstance()->replaceScene(scene);
+} 
 void NewGame::backFun(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->preloadEffect("anniu.wav");
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环

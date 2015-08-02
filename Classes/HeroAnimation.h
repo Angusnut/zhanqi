@@ -7,5 +7,7 @@ using namespace std;
 class HeroAnimation{
 public:
     static Animate *setAnimate(int, int, string);
+    static Animate *setUIAnimate(int, int, string);
+	static Animate *setAnimate(int, int, string, string);
 };
 #endif 

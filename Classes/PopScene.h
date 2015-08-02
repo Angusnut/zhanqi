@@ -10,12 +10,14 @@ class PopScene : public CCLayer
 public:
     static CCScene * scene();
     bool init();
+    ~PopScene();
     CREATE_FUNC(PopScene);
     //设置对话框的文本内容
     void setContent(int);
     //在弹出的对话框上加按钮，以下的函数是对应的按钮的处理事件
     void yesButton(int);
     void noButton(int);
+    void setAnimation(string);
     void setBg(string, int, int);
     void setContent(string, int, int);
 private:
@@ -25,8 +27,10 @@ private:
     CCSize mSize;
     //对话框的背景精灵
     CCSprite * mBg;
+    int myflag;
     void onOK(CCObject* pSender);
     void onBack(CCObject* pSender);
     void onExit(CCObject* pSender);
+    void onStart(CCObject* pSender);
 };
 #endif

@@ -40,6 +40,9 @@ bool Help::init()
     bg->setPosition(ccp(visibleSize.width / 2, visibleSize.height / 2));
     this->addChild(bg, -1);
     
+    SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("help.wma");
+   //开始播放背景音乐，true表示循环
+    SimpleAudioEngine::sharedEngine()->playBackgroundMusic("help.wma",true);
 	//游戏规则
     string path = "images/help/";
     //string ssssss = path + "game_rules.png";

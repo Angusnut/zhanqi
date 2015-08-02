@@ -9,6 +9,7 @@ public:
 	string name;
 	string file;
 	Sprite* sprite;
+    static int mapindex;
 	int index;//------the index in the vector<sprite* >
 	Hero(string s, string f);
 	Hero();

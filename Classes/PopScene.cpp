@@ -8,6 +8,12 @@ bool PopScene::init()
     {
         return false;
     }
+    CCSequence *popupActions = CCSequence::create(
+        CCScaleTo::create(0.0, 0.0),
+        CCScaleTo::create(0.06, 1.05),
+        CCScaleTo::create(0.08, 0.95),
+        CCScaleTo::create(0.08, 1.0), NULL);
+    this->runAction(popupActions);
     return true;
 }
 void PopScene::setBg(string s, int width, int height){
@@ -39,6 +45,8 @@ void PopScene::setContent(string s, int w, int h){
 }
 void PopScene::yesButton(int flag){
     CCMenuItemImage *pMenuItem;
+    int b = 60;
+    int c = 100;
     if (flag == 0){
         pMenuItem = CCMenuItemImage::create(
             "images/popup/yesbutton.png",
@@ -53,10 +61,36 @@ void PopScene::yesButton(int flag){
             this,
             menu_selector(PopScene::onExit));
     }
-    pMenuItem->setPosition(ccp(mSize.width / 2 - 100, mSize.height / 2 - 60));
+    if (flag == 2){
+        pMenuItem = CCMenuItemImage::create(
+            "images/fightstart/backto.png",
+            "images/fightstart/backto_selected.png",
+            this,
+            menu_selector(PopScene::onBack));
+        c = -120;
+        b = 120;
+    }
+    if (flag == 3){
+        pMenuItem = CCMenuItemImage::create(
+            "images/fightstart/restart.png",
+            "images/fightstart/restart_selected.png",
+            this,
+            menu_selector(PopScene::onStart));
+        c = 120;
+        b = 120;
+    }
+    pMenuItem->setPosition(ccp(mSize.width / 2 - c, mSize.height / 2 - b));
     CCMenu* pMenu = CCMenu::create(pMenuItem, NULL);
     pMenu->setPosition(Point::ZERO);
     this->addChild(pMenu);
+}
+void PopScene::setAnimation(string s){
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    Sprite *sprite = Sprite::create("singlePoint.png");
+    sprite->setPosition(ccp(visibleSize.width / 2, visibleSize.height / 2));
+    Animate *animation = HeroAnimation::setUIAnimate(1, 5, s);
+    sprite->runAction(animation);
+    this->addChild(sprite, 4);
 }
 void PopScene::noButton(int flag){
     CCMenuItemImage *pMenuItem = CCMenuItemImage::create(
@@ -73,6 +107,7 @@ void PopScene::noButton(int flag){
     CCMenu* pMenu = CCMenu::create(pMenuItem, NULL);
     pMenu->setPosition(Point::ZERO);
     this->addChild(pMenu);
+    myflag = 0;
 }
 void PopScene::onOK(CCObject* pSender)
 {
@@ -88,10 +123,28 @@ void PopScene::onBack(CCObject* pSender)
     SimpleAudioEngine::sharedEngine()->preloadEffect("anniu.wav");
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
     Director::getInstance()->getEventDispatcher()->resumeEventListenersForTarget(this->getParent(), true); 
+    //CCNotificationCenter::sharedNotificationCenter()->postNotification("backMessage", NULL);
+    //this->release();
     this->removeFromParentAndCleanup(true);
     auto scene = HelloWorld::createScene();
-    Director::getInstance()->pushScene(scene);
-    //Director::getInstance()->replaceScene(scene);
+    Director::getInstance()->replaceScene(scene);
+}
+void PopScene::onStart(CCObject* pSender)
+{
+    CCNotificationCenter::sharedNotificationCenter()->purgeNotificationCenter();
+    SimpleAudioEngine::sharedEngine()->preloadEffect("anniu.wav");
+    SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
+    Director::getInstance()->getEventDispatcher()->resumeEventListenersForTarget(this->getParent(), true);
+    //CCNotificationCenter::sharedNotificationCenter()->postNotification("backMessage", NULL);
+    //this->release();
+    CCString *str = CCString::create(GameStartScene::restart);
+    auto scene = GameStartScene::create();
+   // CCNotificationCenter::sharedNotificationCenter()->postNotification("2PMessage", str);
+	scene->addSprite(GameStartScene::restart);
+    Director::getInstance()->replaceScene(scene);
+    this->removeFromParentAndCleanup(true);
+}
+PopScene:: ~PopScene(){
 }
 void PopScene::onExit(CCObject* pSender)
 {

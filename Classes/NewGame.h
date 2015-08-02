@@ -14,6 +14,7 @@ public:
     virtual bool init();
     void backFun(cocos2d::Ref* pSender);
     void fightFun(cocos2d::Ref* pSender);
+    void storyFun(cocos2d::Ref* pSender);
     // a selector callback
     void menuCloseCallback(cocos2d::Ref* pSender);
 

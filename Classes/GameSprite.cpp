@@ -90,7 +90,7 @@ GameSprite::GameSprite(string name_)
 		type = SpriteType(name_, 2, 1200, 200, 92, 70, 92, 76);
 	}
 
-	if (name_ == "zhenmi")
+	if (name_ == "zhenbi")
 	{
 		type = SpriteType(name_, 3, 1200, 200, 20, 85, 35, 80);
 	}
@@ -222,7 +222,10 @@ GameSprite::GameSprite(string name_)
 	{
 		type = SpriteType(name_, 1, 1200, 200, 73, 72, 88, 79);
 	}
-
+    if (name_ == "dongzhuo")
+    {
+        type = SpriteType(name_, 1, 1200, 200, 73, 72, 85, 88);
+    }
 	if (name_ == "liubiao")
 	{
 		type = SpriteType(name_, 3, 1200, 200, 58, 83, 54, 81);
@@ -253,47 +256,16 @@ GameSprite::GameSprite(string name_)
 
 }
 
-GameSprite::~GameSprite()   //ﾊﾍｷﾅｶｯｻｭ  
-{
-	if (idleAction != NULL)
-	{
-		idleAction->release();
-		idleAction = NULL;
-	}
-	if (walkAction != NULL)
-	{
-		walkAction->release();
-		walkAction = NULL;
-	}
-	if (attackAction != NULL)
-	{
-		attackAction->release();
-		attackAction = NULL;
-	}
-	if (hurtAction != NULL)
-	{
-		hurtAction->release();
-		hurtAction = NULL;
-	}
-	if (knockedoutAction != NULL)
-	{
-		knockedoutAction->release();
-		knockedoutAction = NULL;
-	}
-}
-
 //ｳｼｻｯ
 void GameSprite::init(Point point, SpriteType type)
 {
 	Sprite::init();
 	this->setPosition(point);
 	this->type = type;
-
 	moveDirection = Point::ZERO;
 	velocity = Point::ZERO;
 	//loadAnimation(type);
 	this->scheduleUpdate();
-	idle();
 }
 
 //ｸ・ﾂ
@@ -302,68 +274,30 @@ void GameSprite::update(float dt)
 	Point distance = velocity * dt;         //ｸﾝﾏｿﾒﾆｶｯ  
 	setPosition(getPosition() + distance);
 }
-
-
-//ｴｻ・
-void GameSprite::idle()
-{
-	if (state != SpriteState::IDLE)
-	{
-		state = SpriteState::IDLE;
-		this->stopAllActions();
-		this->runAction(idleAction);
-	}
+void GameSprite::attackAnimation(int tag, int flag){
+    CCLOG("%d", flag);
+    CCLOG(this->get_type().get_name().c_str());
+    Animate *animation1, *animation2;
+    this->stopAllActions();
+    animation1 = HeroAnimation::setAnimate(flag*4 + 1, flag*4 + 4, this->get_type().get_name(), "attack");  
+    if (tag == 1){
+        animation2 = HeroAnimation::setAnimate(9, 12, this->get_type().get_name());
+    }
+    else {
+        animation2 = HeroAnimation::setAnimate(5, 8, this->get_type().get_name());
+    }
+    CCLOG(this->get_type().get_name().c_str());
+    Sequence *seq = Sequence::create(animation1, animation2, NULL);
+    this->runAction(seq);
 }
-
-//ﾗﾟﾂｷ
-void GameSprite::walkWithDirection(Point direction)
-{
-	if (state != SpriteState::WALK)
-	{
-		state = SpriteState::WALK;
-		this->stopAllActions();
-		this->runAction(walkAction);
-	}
+void GameSprite::deadAnimation(){
+    Animate *animation;
+    this->stopAllActions();
+    animation = HeroAnimation::setAnimate(1, 4, this->get_type().get_name(), "dead");
+    CCLOG(this->get_type().get_name().c_str());
+    this->runAction(animation);
 }
-
-//ｹ･ｻ・
-void GameSprite::attack()
-{
-	if (state != SpriteState::ATTACK)
-	{
-		state = SpriteState::ATTACK;
-		this->stopAllActions();
-		auto *atta = Sequence::create(attackAction,
-			CallFunc::create(CC_CALLBACK_0(GameSprite::idle, this)), NULL);
-		this->runAction(atta);
-	}
-}
-
-//ﾊﾜﾉﾋ
-void GameSprite::hurtWithDamage(int damage)
-{
-	if (state != SpriteState::HURT)
-	{
-		state = SpriteState::HURT;
-		this->stopAllActions();
-		auto *hurt = Sequence::create(hurtAction,
-			CallFunc::create(CC_CALLBACK_0(GameSprite::idle, this)), NULL);
-		this->runAction(hurt);
-	}
-}
-
-//ﾋﾀﾍ・
-void GameSprite::knockedout()
-{
-	if (state != SpriteState::KNOCKEDOUT)
-	{
-		state = SpriteState::KNOCKEDOUT;
-		this->stopAllActions();
-		this->runAction(knockedoutAction);
-	}
-}
-
-SpriteType GameSprite::get_type() {
+SpriteType& GameSprite::get_type() {
 	return type;
 }
 
@@ -377,11 +311,15 @@ GameSprite* GameSprite::create(string heroName, int player){
         animation = HeroAnimation::setAnimate(5, 8, heroName);
     }
     sprite->setScale(1.4f, 1.4f);
-    sprite->runAction(RepeatForever::create(animation));//播放动画
+    sprite->runAction(animation);//播放动画
     if (sprite && sprite->initWithFile("singlePoint.png")){
 		sprite->autorelease();
 		return sprite;
 	}
 	CC_SAFE_DELETE(sprite);
 	return nullptr;
+}
+
+BloodProgress* GameSprite::get_blood() {
+	return blood;
 }
