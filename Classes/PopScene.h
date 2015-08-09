@@ -32,5 +32,6 @@ private:
     void onBack(CCObject* pSender);
     void onExit(CCObject* pSender);
     void onStart(CCObject* pSender);
+	void onLoad(CCObject* pSender);
 };
 #endif

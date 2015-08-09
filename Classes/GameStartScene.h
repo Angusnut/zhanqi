@@ -6,14 +6,17 @@
 #include "Help.h"
 #include "GamePlayLayer.h" 
 #include "SimpleAudioEngine.h"
+#include "name_id.h"
+#include "archive.h"
+
 using namespace CocosDenshion;
 class GameStartScene : public cocos2d::CCScene
 {
 private:
     string s;
     string mapName;
-    int mapIndex;
     position p1;
+	int map_id;
 public:
     ~GameStartScene();
     bool init();
@@ -58,6 +61,7 @@ public:
 	position getAIMovePos(position, vector<position> );
 	position AIMoveMostEfficient(position, vector<position>);
 	int attackableCount(position, int&);
+	void new_addSprite();
     vector<GameSprite*> herolist_1;
 	vector<GameSprite*> herolist_2;
 	CREATE_FUNC(GameStartScene);

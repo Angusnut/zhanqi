@@ -15,57 +15,75 @@ GamePlayLayer::GamePlayLayer(void)
 
 bool GamePlayLayer::init()
 {
-	return true;
-}
-void GamePlayLayer::loadMap(int mapIndex){
-    if (mapIndex == 0){
-        pTileMap = CCTMXTiledMap::create("chibi.tmx");
-        pTileMap->setTag(0);
-        CCLOG("mapIndex0");
-    }
-    else if (mapIndex == 1){
-        pTileMap = CCTMXTiledMap::create("guandu.tmx");
-        pTileMap->setTag(1);
-        CCLOG("mapIndex1");
-    }
-    else if (mapIndex == 2){
-        pTileMap = CCTMXTiledMap::create("hanzhong.tmx");
-        pTileMap->setTag(2);
-        CCLOG("mapIndex2");
-    }
-    else if (mapIndex == 3){
-        pTileMap = CCTMXTiledMap::create("hulaoguan.tmx");
-        pTileMap->setTag(3);
-        CCLOG("mapIndex3");
-    }
-    else if (mapIndex == 4){
-        pTileMap = CCTMXTiledMap::create("xuzhou.tmx");
-        pTileMap->setTag(4);
-        CCLOG("mapIndex4");
-    }
-    else{
-        pTileMap = CCTMXTiledMap::create("yiling.tmx");
-        pTileMap->setTag(5);
-        CCLOG("mapIndex5");
-    }
-    setTileMap(pTileMap);
-    CCLOG("%d", pTileMap->getTag());
-    // 设置背景层  
-    this->setBackground(_tileMap->layerNamed("background"));
-    winSize = CCDirector::sharedDirector()->getWinSize();
-    mapSize = pTileMap->getContentSize();
-    width_diff = 214;
-    height_diff = 0;
-    pTileMap->setPosition(ccp(214, 0));
-    this->addChild(pTileMap);
-    mapSize = pTileMap->getContentSize();
+	bool bRct = false;
+	do
+	{
+		CC_BREAK_IF(!CCLayer::init());
+		// 1、地图
+		// 设置地图
+		pTileMap = CCTMXTiledMap::create("map.tmx");
+		CC_BREAK_IF(!pTileMap);
+		setTileMap(pTileMap);
+		// 设置背景层  
+	    this->setBackground(_tileMap->layerNamed("background"));
 
-    map_width = mapSize.width;
-    map_height = mapSize.height;
-    auto listener = EventListenerTouchOneByOne::create();
-    listener->onTouchBegan = [&](Touch *touch, Event *unused_event)->bool {return true; };
-    listener->onTouchEnded = CC_CALLBACK_2(GamePlayLayer::onTouchEnded, this);
-    this->_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+        CC_BREAK_IF(!_background);
+
+		//this->setBackground(_tileap->layerNamed("mask"));
+		//CC_BREAK_IF(!_mask);
+
+		//this->setBackground(_tileMap->layerNamed("foreground"));
+		//CC_BREAK_IF(!_foreground);
+		//blend->setColor(ccWHITE);
+		//blend->setPosition(300, 300);
+
+
+		 winSize = CCDirector::sharedDirector()->getWinSize();
+		 mapSize =pTileMap->getContentSize();
+
+			//缩放地图到合适屏幕大小
+			//scale = winSize.height / pTileMap->getContentSize().height;
+			//pTileMap->setScale(scale);
+
+			//将地图放到屏幕中间
+			width_diff = 214;
+			height_diff = 0;
+			pTileMap->setPosition(ccp(214,0));
+			this->addChild(pTileMap);
+			mapSize = pTileMap->getContentSize();
+
+			map_width = mapSize.width;
+			map_height = mapSize.height;
+		bRct = true;
+		//2、创建和显示玩家精灵
+		// 创建精灵1
+		/*CCSprite *pSpritePlayer = CCSprite::create("rev1.png");
+		CC_BREAK_IF(!pSpritePlayer);
+		this->setPlayerSprite(pSpritePlayer);
+		_pPlayerSprite->setPosition(ccp(550, 200));
+		// 将玩家精灵添加至图层
+		this->addChild(_pPlayerSprite);
+	//	setViewPointCenter(_pPlayerSprite->getPosition());
+		//创建精灵2
+		CCSprite *pSpritePlayer2 = CCSprite::create("rev3.png");
+		CC_BREAK_IF(!pSpritePlayer2);
+		this->setPlayerSprite(pSpritePlayer2);
+		pSpritePlayer2->setPosition(ccp(600, 200));
+		// 将玩家精灵添加至图层
+		this->addChild(pSpritePlayer2);*/
+
+		
+		auto listener = EventListenerTouchOneByOne::create();
+		listener->onTouchBegan = [&](Touch *touch, Event *unused_event)->bool {return true; };
+		listener->onTouchEnded = CC_CALLBACK_2(GamePlayLayer::onTouchEnded, this);
+		this->_eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
+
+
+
+
+	} while (0);
+
+	return bRct;
 }
 /*
 void GamePlayLayer::setViewPointCenter(Point position) {

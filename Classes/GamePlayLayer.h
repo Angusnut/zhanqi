@@ -7,8 +7,10 @@ class GamePlayLayer : public cocos2d::CCLayer
 {
 public:
 	GamePlayLayer(void);
+
 	bool init();
 	CREATE_FUNC(GamePlayLayer);
+
 	// 1¡¢µØÍ¼
 	// ·½¿éµØÍ¼
 	CC_SYNTHESIZE_RETAIN(cocos2d::CCTMXTiledMap*, _tileMap, TileMap);
@@ -25,7 +27,6 @@ public:
 
 	void onTouchEnded(cocos2d::Touch *touch, cocos2d::Event *unused_event);
 	void setPlayerPosition(cocos2d::Point position);
-    void loadMap(int);
     static int object_id;
 	std::vector<Sprite* > blends;
 	CCTMXTiledMap *pTileMap;

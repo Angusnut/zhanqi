@@ -163,6 +163,7 @@ private:
 	map<position, Sprite* > mapper;
 	map<position, Sprite* > a_mapper;
 	map<int, BloodProgress* > bloods;
+	map<position, bool> is_searched;
 };
 
 #endif

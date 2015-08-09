@@ -17,7 +17,7 @@ int count_1 = 10, count_2 = 10; //----------count of heroes of player1 and 2
 int AICount = 0;
 int death_flag = 0;
 int updateCount = 0;
-string GameStartScene::restart = ""; 
+string GameStartScene::restart = "";
 string path = "images/fightstart/";
 char *heroName[40] = { "caocao", "caiwenji", "caoren", "dianwei", "guojia", "xiahoudun", "xiahouyuan",
 "xuchu", "zhangliao", "zhenbi", "sunquan", "chengpu", "daqiao", "huanggai", "lusu", "luxun", "sunce",
@@ -29,6 +29,7 @@ GameStartScene::~GameStartScene(){
 }
 bool GameStartScene::init()
 {
+	MAP = new G_Map(18, 12, 64, 64);
 	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("battle.wma");
 	//开始播放背景音乐，true表示循环
 	SimpleAudioEngine::sharedEngine()->playBackgroundMusic("battle.wma", true);
@@ -36,6 +37,7 @@ bool GameStartScene::init()
     Vec2 origin = Director::getInstance()->getVisibleOrigin();
     CCNotificationCenter::sharedNotificationCenter()->addObserver(this,
         callfuncO_selector(GameStartScene::getArray), "StartMessage", NULL);
+	initGlobal();
     //边栏背景
     auto *side = CCSprite::create(path + "side.png");
     side->setPosition(ccp(107, visibleSize.height / 2));
@@ -114,14 +116,12 @@ bool GameStartScene::init()
 bool doubleClick = false;
 bool doubleClicked = false;
 bool GameStartScene::loadMap(){
-    MAP = new G_Map(18, 12, 64, 64);
     bool bRct = false;
     do
     {
-        //CC_BREAK_IF(!CCScene::init());
-        GamePlayLayer *pGamePlatLayer = GamePlayLayer::create(); 
-        pGamePlatLayer->loadMap(mapIndex);
+        CC_BREAK_IF(!CCScene::init());
 
+        GamePlayLayer *pGamePlatLayer = GamePlayLayer::create();
         CC_BREAK_IF(!MAP->get_layer());
 
         this->addChild(MAP->get_layer(), 1);
@@ -133,7 +133,6 @@ bool GameStartScene::loadMap(){
 
         bRct = true;
     } while (0);
-    initGlobal();
     scheduleUpdate();
     return bRct;
 }
@@ -271,7 +270,7 @@ void GameStartScene::getArray(CCObject* obj){
             heros = "DEFGHIJKLM:;<=>?@ABC";
         }
         s = heros + s;
-        AIflag = -1;
+        AIflag = 2;
     }
     restart = s;
     addSprite(s);
@@ -280,8 +279,8 @@ void GameStartScene::addSprite(string s){
     Size visibleSize = Director::getInstance()->getVisibleSize();
     char *mapNameList[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling" };
     int index = s[20] - '0';
+	map_id = index;
     mapName = mapNameList[index];
-    mapIndex = index;
     auto *name = CCSprite::create(path + mapName + "_column.png");
     name->setPosition(ccp(107, visibleSize.height - 200));
     this->addChild(name);
@@ -300,11 +299,63 @@ void GameStartScene::addSprite(string s){
         MAP->put_hero_on_pos(s, position(16, j + 1));
     }
 }
+void GameStartScene::new_addSprite()
+{
+	archive x;
+	herolist_1 = x.open_archive(0);
+	herolist_2 = x.open_archive(10);
+	map_id = x.get_map();
+	AIflag = 2;
+	Size visibleSize = Director::getInstance()->getVisibleSize();
+	char *mapNameList[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling" };
+
+	int index = x.get_map();
+	mapName = mapNameList[index];
+	auto *name = CCSprite::create(path + mapName + "_column.png");
+	name->setPosition(ccp(107, visibleSize.height - 200));
+	this->addChild(name);
+	for (int i = 0; i < 10; i++){
+		string heroname = herolist_1[i]->get_type().get_name();
+		GameSprite* s = GameSprite::create(heroname, 1);
+		s->get_type().change_life(herolist_1[i]->get_type().get_life());
+		s->get_type().change_magic(herolist_1[i]->get_type().get_magic());
+		s->get_type().set_position(herolist_1[i]->get_type().get_x(), herolist_1[i]->get_type().get_y());
+		s->setTag(i);
+		MAP->put_hero_on_pos(s, position(1, i + 1));
+	}
+
+	for (int j = 0; j < 10; j++){
+		string heroname = herolist_2[j]->get_type().get_name();
+		GameSprite* s = GameSprite::create(heroname, 2);
+		s->get_type().change_life(herolist_2[j]->get_type().get_life());
+		s->get_type().change_magic(herolist_2[j]->get_type().get_magic());
+		s->get_type().set_position(herolist_2[j]->get_type().get_x(), herolist_2[j]->get_type().get_y());
+		s->setTag(j);
+		MAP->put_hero_on_pos(s, position(16, j + 1));
+	}
+	
+}
 void GameStartScene::saveGame(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
+	archive x;
+	x.save_archive(herolist_1, map_id, 1);
+	x.save_archive(herolist_2, map_id, 0);
 }
 void GameStartScene::loadGame(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
+
+
+	PopScene* pop = PopScene::create();
+	pop->setBg("images/popup/popWindow.png", -1, -1);
+	pop->setPosition(ccp(0, 20));
+	pop->setContent(5);
+	pop->noButton(1);
+	pop->yesButton(4);
+	//this->setTouchEnabled(false)
+	Director::getInstance()->getEventDispatcher()->pauseEventListenersForTarget(this, true);
+	this->addChild(pop, 6);
+
+
 }
 void GameStartScene::help(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
@@ -326,7 +377,7 @@ void GameStartScene::backToMenu(Ref* pSender){
     pop->setPosition(ccp(0, 20));
     pop->setContent(5);
     pop->noButton(1);
-    pop->yesButton(0);
+    pop->yesButton(4);
     //this->setTouchEnabled(false)
     Director::getInstance()->getEventDispatcher()->pauseEventListenersForTarget(this, true);
     this->addChild(pop, 6);

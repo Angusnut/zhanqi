@@ -79,6 +79,15 @@ void PopScene::yesButton(int flag){
         c = 120;
         b = 120;
     }
+
+	if (flag == 4){
+		pMenuItem = CCMenuItemImage::create(
+			"images/popup/yesbutton.png",
+			"images/popup/yesbutton_selected.png",
+			this,
+			menu_selector(PopScene::onLoad));
+	}
+
     pMenuItem->setPosition(ccp(mSize.width / 2 - c, mSize.height / 2 - b));
     CCMenu* pMenu = CCMenu::create(pMenuItem, NULL);
     pMenu->setPosition(Point::ZERO);
@@ -125,9 +134,9 @@ void PopScene::onBack(CCObject* pSender)
     Director::getInstance()->getEventDispatcher()->resumeEventListenersForTarget(this->getParent(), true); 
     //CCNotificationCenter::sharedNotificationCenter()->postNotification("backMessage", NULL);
     //this->release();
-    this->removeFromParentAndCleanup(true);
     auto scene = HelloWorld::createScene();
     Director::getInstance()->replaceScene(scene);
+    this->removeFromParentAndCleanup(true);
 }
 void PopScene::onStart(CCObject* pSender)
 {
@@ -144,6 +153,23 @@ void PopScene::onStart(CCObject* pSender)
     Director::getInstance()->replaceScene(scene);
     this->removeFromParentAndCleanup(true);
 }
+
+void PopScene::onLoad(CCObject* pSender)
+{
+	CCNotificationCenter::sharedNotificationCenter()->purgeNotificationCenter();
+	SimpleAudioEngine::sharedEngine()->preloadEffect("anniu.wav");
+	SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
+	Director::getInstance()->getEventDispatcher()->resumeEventListenersForTarget(this->getParent(), true);
+	//CCNotificationCenter::sharedNotificationCenter()->postNotification("backMessage", NULL);
+	//this->release();
+	CCString *str = CCString::create(GameStartScene::restart);
+	auto scene = GameStartScene::create();
+	// CCNotificationCenter::sharedNotificationCenter()->postNotification("2PMessage", str);
+	scene->new_addSprite();
+	Director::getInstance()->replaceScene(scene);
+	this->removeFromParentAndCleanup(true);
+}
+
 PopScene:: ~PopScene(){
 }
 void PopScene::onExit(CCObject* pSender)

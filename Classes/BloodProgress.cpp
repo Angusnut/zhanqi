@@ -34,7 +34,7 @@ void BloodProgress::setCurrentProgress(float progress)
 }
 
 void BloodProgress::setForegroundTextureRect(const CCRect &rect)
-{ 
+{
 	m_progressForeground->setTextureRect(rect);
 }
 

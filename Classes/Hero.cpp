@@ -5,7 +5,7 @@ Hero::Hero(string s,string f) {
 	file = f;
 	sprite = Sprite::create(f);
 }
-int Hero::mapindex = -1;
+
 Hero::Hero() {
 	name = "";
 }

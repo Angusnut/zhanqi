@@ -346,7 +346,6 @@ GamePlayLayer* G_Map::get_layer() {
 
 
 vector< vector<Grid> > G_Map:: get_grids(){
-
 	return grids;
 }
 
@@ -385,10 +384,15 @@ void G_Map::search_pos(position p, vector<position>& answer, int depth, bool ini
 	if (get_terrain(p) == "brick") {
 		return;
 	}
+	if (is_searched[p] == true) {  //searched
+		return;
+	}
 	if (!is_pos_empty(p) && init) {
+		is_searched.clear();
 		return;
 	}
 	answer.push_back(p);
+	is_searched.insert(pair<position, bool> (p, true));
 	search_pos(get_up_pos(p), answer, depth - 1, true);
 	search_pos(get_down_pos(p), answer, depth - 1, true);
 	search_pos(get_left_pos(p), answer, depth - 1, true);
@@ -399,14 +403,25 @@ void G_Map::search_a_pos(position p, vector<position>& answer, int depth, bool i
 	if (depth == -1) {
 		return;
 	}
-	if (p == position(-1, -1)){
+	if (p == position(-1, -1)) {
 		return;
 	}
-	answer.push_back(p);
-	search_a_pos(get_up_pos(p), answer, depth - 1, true);
-	search_a_pos(get_down_pos(p), answer, depth - 1, true);
-	search_a_pos(get_left_pos(p), answer, depth - 1, true);
-	search_a_pos(get_right_pos(p), answer, depth - 1, true);
+	for (int i = -depth; i <= 0; i++) {
+		for (int j = -(i + depth); j <= i + depth; j++) {
+			position pt = position(p.x + i, p.y + j);
+			if (is_valid_pos(pt)); {
+				answer.push_back(pt);
+			}
+		}
+	}
+	for (int i = 1; i <= depth; i++) {
+		for (int j = -(depth - i); j <= depth - i ; j++) {
+			position pt = position(p.x + i, p.y + j);
+			if (is_valid_pos(pt)); {
+				answer.push_back(pt);
+			}
+		}
+	}
 }
 
 vector<position> G_Map::get_attackable_pos(position p) {
