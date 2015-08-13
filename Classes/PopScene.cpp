@@ -8,15 +8,14 @@ bool PopScene::init()
     {
         return false;
     }
-    CCSequence *popupActions = CCSequence::create(
-        CCScaleTo::create(0.0, 0.0),
-        CCScaleTo::create(0.06, 1.05),
-        CCScaleTo::create(0.08, 0.95),
-        CCScaleTo::create(0.08, 1.0), NULL);
-    this->runAction(popupActions);
     return true;
 }
 void PopScene::setBg(string s, int width, int height){
+    int flag = 0;
+    if (width > 10000){
+        flag = 1;
+        width /= 10000;
+    }
     mSize = CCDirector::sharedDirector()->getWinSize();
     mBg = CCSprite::create(s);
     if (width == -1){
@@ -26,6 +25,15 @@ void PopScene::setBg(string s, int width, int height){
         mBg->setPosition(ccp(width, height));
     }
     this->addChild(mBg);
+    if (flag == 1){
+        return;
+    }
+    CCSequence *popupActions = CCSequence::create(
+        CCScaleTo::create(0.0, 0.0),
+        CCScaleTo::create(0.06, 1.05),
+        CCScaleTo::create(0.08, 0.95),
+        CCScaleTo::create(0.08, 1.0), NULL);
+    this->runAction(popupActions);
 }
 void registerWithTouchDispatcher(void){
     //使用int最小值做最高优先级  

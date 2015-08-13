@@ -18,6 +18,7 @@ private:
     position p1;
 	int map_id;
     int AIflag;
+    int tgflag;
 public:
     ~GameStartScene();
     bool init();
@@ -27,6 +28,7 @@ public:
     void help(cocos2d::Ref* pSender);
 	void switchPlayer(cocos2d::Ref* pSender);
     void backToMenu(cocos2d::Ref* pSender);
+    void tuoguan(cocos2d::Ref* pSender);
     void removeHint(float);
 	void updateGame();
     void getArray(cocos2d::CCObject* obj);

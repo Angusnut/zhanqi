@@ -30,6 +30,7 @@ GameStartScene::~GameStartScene(){
 bool GameStartScene::init()
 {
     AIflag = -1;
+    tgflag = 2;
 	MAP = new G_Map(18, 12, 64, 64);
 	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("battle.wma");
 	//开始播放背景音乐，true表示循环
@@ -52,6 +53,8 @@ bool GameStartScene::init()
     auto *sprite3_1 = CCSprite::create(path + "bangzhu_selected.png");
     auto *sprite4 = CCSprite::create(path + "zhucaidan.png");
     auto *sprite4_1 = CCSprite::create(path + "zhucaidan_selected.png");
+    auto *sprite5 = CCSprite::create(path + "tuoguan.png");
+    auto *sprite5_1 = CCSprite::create(path + "tuoguan_selected.png");
 	auto *spriteJ = CCSprite::create(path + "jieshuhuihe.png");
 	auto *spriteJ_1 = CCSprite::create(path + "jieshuhuiheselected.png");
 
@@ -60,20 +63,24 @@ bool GameStartScene::init()
     auto *bangzhu = CCMenuItemSprite::create(sprite3, sprite3_1, sprite3, this, menu_selector(GameStartScene::help));
     auto *zhucaidan = CCMenuItemSprite::create(sprite4, sprite4_1, sprite4, this, menu_selector(GameStartScene::backToMenu));
 	auto *jieshuhuihe = CCMenuItemSprite::create(spriteJ, spriteJ_1, spriteJ, this, menu_selector(GameStartScene::switchPlayer));
+    auto *tuoGuan = CCMenuItemSprite::create(sprite5, sprite5_1, sprite5, this, menu_selector(GameStartScene::tuoguan));
     cundang->setScale(0.4f, 0.4f);
     dudang->setScale(0.4f, 0.4f);
     bangzhu->setScale(0.4f, 0.4f);
     zhucaidan->setScale(0.4f, 0.4f);
+    tuoGuan->setScale(0.7f, 0.7f);
 
     cundang->setPosition(ccp(44, 150));
     dudang->setPosition(ccp(88, 150));
     bangzhu->setPosition(ccp(132, 150));
     zhucaidan->setPosition(ccp(176, 150));
 	jieshuhuihe->setPosition(ccp(110, 300));
+    tuoGuan->setPosition(ccp(170, 220));
     CCMenu *menu = CCMenu::create(cundang, NULL);
     menu->addChild(dudang, NULL);
     menu->addChild(bangzhu, NULL);
     menu->addChild(zhucaidan, NULL);
+    menu->addChild(tuoGuan, NULL);
 	CCMenu *menu_J = CCMenu::create(jieshuhuihe, NULL);
 	menu_J->setPosition(Point::ZERO);
     menu->setPosition(Point::ZERO);
@@ -347,6 +354,12 @@ void GameStartScene::new_addSprite()
     count_2 = sum2;
 	
 }
+void  GameStartScene::tuoguan(Ref* pSender){
+    int a = AIflag;
+    AIflag = tgflag;
+    tgflag = a;
+
+}
 void GameStartScene::saveGame(Ref* pSender){
     string s = XMLParser::parseXML("hintStrings", 11);
     CCLabelTTF* pLabel = CCLabelTTF::create(s, "【朦胧补】水黑体", 27);
@@ -542,8 +555,9 @@ void GameStartScene::popHeroTag(Point touch_location) {
     else {
         y = 64;
     }
-    pops->setBg(path+"hero_popup.png", x, y);
+    pops->setBg(path+"hero_popup.png", x*10000, y);
 	pops->setName("popwin");
+
 	int tag = MAP->get_hero_on_pos(p1)->getTag();
 	string name;
 	char lifes[100] = { 0 };
