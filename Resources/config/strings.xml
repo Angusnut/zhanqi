@@ -63,6 +63,18 @@
 <seventh>
 您确定要退出游戏吗？
 </seventh>
+<eighth>
+是否放弃当前游戏进度？
+</eighth>
+<nineth>
+是否继续上次游戏进度？
+</nineth>
+<tenth>
+正在存档...
+</tenth>
+<eleven>
+存档成功！
+</eleven>
 </hintStrings>
 
 <popuwindow>

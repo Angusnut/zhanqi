@@ -1,5 +1,5 @@
 #include "SpriteType.h"
-void SpriteType::set_position(double x_, double y_)
+void SpriteType::set_position(int x_, int y_)
 {
 	x = x_;
 	y = y_;
@@ -10,12 +10,12 @@ string SpriteType::get_name()
 	return name;
 }
 
-double SpriteType::get_x()
+int SpriteType::get_x()
 {
 	return x;
 }
 
-double SpriteType::get_y()
+int SpriteType::get_y()
 {
 	return y;
 }

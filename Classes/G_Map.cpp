@@ -108,7 +108,7 @@ bool G_Map::put_hero_on_pos(GameSprite* h, position p) {
 	else {
 		blood->setForegroundTexture("bloodfore.png");
 	}
-	blood->setTotalProgress(h->get_type().get_life());
+	blood->setTotalProgress(1200);
 	blood->setCurrentProgress(h->get_type().get_life());
 	blood->setPosition(h->getPositionX(), h->getPositionY() + 30);
 	gplayer->addChild(blood);
@@ -134,6 +134,7 @@ bool G_Map::move(position ps, position pe) {
 	}
 	GameSprite* hero = grids[ps.y][ps.x].get_hero();
 	hero->setPosition(get_center_of_pos(pe));
+	hero->get_type().set_position(pe.x, pe.y);
 	bloods[hero->getTag()]->setPosition(hero->getPositionX(), hero->getPositionY() + 30);
 //	hero->get_blood()->setPosition(get_center_of_pos(pe).x, get_center_of_pos(pe).y + 40);
 	grids[pe.y][pe.x].put(hero);
@@ -196,7 +197,7 @@ std::string G_Map::get_terrain(position p) {
 		str = "ground";
 	}
 	else
-		str = "fuck";
+		str = "error";
 	/*if (gid == 1){
 	CCLOG("it's ground");
 	str = "ground";
@@ -461,15 +462,22 @@ bool G_Map::attack(position ps, position pe) {
     else {
         flag = 3;              //¹¥ÏÂ·ÀÉÏ
     }
+	int x1 = ps.x;
+	int y1 = ps.y;
+	int x2 = pe.x;
+	int y2 = pe.y;
 	GameSprite* ahero = get_hero_on_pos(ps);
+	ahero->get_type().set_position(x1, y1);
 	GameSprite* dhero = get_hero_on_pos(pe);
+	dhero->get_type().set_position(x2, y2);
 	int damage = ahero->get_type().get_D_attack() - 0.2 * dhero->get_type().get_D_defense();
 	dhero->get_type().change_life(dhero->get_type().get_life() - damage);
 	ahero->get_type().change_magic(dhero->get_type().get_magic() * 0.9);
     ahero->attackAnimation(ahero->getTag() / 10 + 1, flag);
 	bloods[dhero->getTag()]->setCurrentProgress(dhero->get_type().get_life());
 	if (dhero->get_type().get_life() <= 0) {
-		dhero->deadAnimation();
+        string str = get_terrain(pe);
+		dhero->deadAnimation(str);
 		CCLOG("DEAD!!!!");
 		//Sleep(1000);
 		bloods[dhero->getTag()]->setVisible(false);

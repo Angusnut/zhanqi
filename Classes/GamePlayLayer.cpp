@@ -1,4 +1,5 @@
 #include "GamePlayLayer.h"
+#include "XMLParser.h"
 using namespace std;
 //#include "GameOverScene.h"
 USING_NS_CC;
@@ -21,7 +22,9 @@ bool GamePlayLayer::init()
 		CC_BREAK_IF(!CCLayer::init());
 		// 1°¢µÿÕº
 		// …Ë÷√µÿÕº
-		pTileMap = CCTMXTiledMap::create("map.tmx");
+        string mapName[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling" };
+        string s = mapName[XMLParser::map_id];
+		pTileMap = CCTMXTiledMap::create(s + ".tmx");
 		CC_BREAK_IF(!pTileMap);
 		setTileMap(pTileMap);
 		// …Ë÷√±≥æ∞≤„  

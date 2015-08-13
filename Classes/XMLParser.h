@@ -7,5 +7,6 @@ using namespace tinyxml2;
 using namespace std;
 class XMLParser{
 public:static string parseXML(const char *key, const int index);
+public:static int map_id;
 };
 #endif

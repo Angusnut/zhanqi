@@ -5,8 +5,11 @@
 #include "SpriteType.h" 
 #include "SpriteState.h" 
 #include <cstring>
+#include <time.h>
 #include "HeroAnimation.h"
 #include "BloodProgress.h"
+#include "SimpleAudioEngine.h"
+using namespace CocosDenshion;
 using namespace std;
 USING_NS_CC;
 
@@ -21,7 +24,8 @@ public:
 	//ﾒﾔﾏﾂﾎｪﾍﾏｵﾄﾄ｣ｰ・ｿﾉﾉｾｼ・
 	void update(float dt);          //ｴｻ・ 
     void attackAnimation(int, int);
-	void deadAnimation(); 
+	void deadAnimation(string); 
+    void setAnimation(int);
 	static GameSprite* create(string, int);
 	BloodProgress* get_blood();
 	//void loadAnimation(SpriteType type);

@@ -36,12 +36,17 @@ void PopScene::setContent(int flag){
     string rules = XMLParser::parseXML("hintStrings", flag);
     CCLabelTTF* pLabel = CCLabelTTF::create(rules, "¡¾ëüëÊ²¹¡¿Ë®ºÚÌå", 20);
     pLabel->setPosition(ccp(mSize.width / 2, mSize.height / 2 + 40));
+    pLabel->setTag(1);
     this->addChild(pLabel);
 }
 void PopScene::setContent(string s, int w, int h){
     CCLabelTTF* pLabel = CCLabelTTF::create(s, "¡¾ëüëÊ²¹¡¿Ë®ºÚÌå", 15);
     pLabel->setPosition(ccp(w, h));
+    pLabel->setTag(1);
     this->addChild(pLabel);
+}
+void PopScene::removeContent(){
+    this->removeChildByTag(1);
 }
 void PopScene::yesButton(int flag){
     CCMenuItemImage *pMenuItem;
@@ -76,6 +81,8 @@ void PopScene::yesButton(int flag){
             "images/fightstart/restart_selected.png",
             this,
             menu_selector(PopScene::onStart));
+        SimpleAudioEngine::sharedEngine()->preloadEffect("voice/end.wav");
+        SimpleAudioEngine::sharedEngine()->playEffect("voice/end.wav", false);
         c = 120;
         b = 120;
     }
@@ -107,7 +114,14 @@ void PopScene::noButton(int flag){
         "images/popup/nobutton_selected.png",
         this,
         menu_selector(PopScene::onOK));
-    if (flag == 0){
+    if (flag == 2){
+        pMenuItem = CCMenuItemImage::create(
+            "images/popup/yesbutton.png",
+            "images/popup/yesbutton_selected.png",
+            this,
+            menu_selector(PopScene::onOK));
+    };
+    if (flag == 0 || flag == 2){
         pMenuItem->setPosition(ccp(mSize.width / 2, mSize.height / 2 - 60));
     }
     else if (flag == 1){
@@ -162,7 +176,10 @@ void PopScene::onLoad(CCObject* pSender)
 	Director::getInstance()->getEventDispatcher()->resumeEventListenersForTarget(this->getParent(), true);
 	//CCNotificationCenter::sharedNotificationCenter()->postNotification("backMessage", NULL);
 	//this->release();
-	CCString *str = CCString::create(GameStartScene::restart);
+	//CCString *str = CCString::create(GameStartScene::restart);
+    archive::open_archive(0);
+    XMLParser::map_id = archive::get_map();
+    //CCLOG("map_id :::::: %d", x.get_map());
 	auto scene = GameStartScene::create();
 	// CCNotificationCenter::sharedNotificationCenter()->postNotification("2PMessage", str);
 	scene->new_addSprite();

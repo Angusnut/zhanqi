@@ -180,9 +180,19 @@ void HelloWorld::helpFun(cocos2d::Ref* pSender){
 };
 void HelloWorld::loadFun(cocos2d::Ref* pSender){
 	SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav",false);//开始播放背景音效，false表示不循环
-    auto scene = GameStartScene::create();
+    //auto scene = GameStartScene::create();
     // run
-    Director::getInstance()->replaceScene(scene);
+   // Director::getInstance()->replaceScene(scene);
+
+	PopScene* pop = PopScene::create();
+	pop->setBg("images/popup/popWindow.png", -1, -1);
+	pop->setPosition(ccp(0, 20));
+	pop->setContent(9);
+	pop->noButton(1);
+	pop->yesButton(4);
+	//this->setTouchEnabled(false)
+	Director::getInstance()->getEventDispatcher()->pauseEventListenersForTarget(this, true);
+	this->addChild(pop, 6);
 };
 
 void HelloWorld::quitFun(cocos2d::Ref* pSender){

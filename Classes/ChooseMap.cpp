@@ -77,7 +77,6 @@ bool ChooseMap::init()
         Point locationInNode = target->convertToNodeSpace(touch->getLocation());
         Size s = target->getContentSize();
         Rect rect = Rect(0, 0, s.width, s.height);
-
         if (rect.containsPoint(locationInNode)){//判断触摸点是否在目标的范围内
             return true;
         }
@@ -95,12 +94,23 @@ bool ChooseMap::init()
             target->selected();
         }
     };
-    for (int j = 0; j < 3; j++){
-        for (int k = 0; k < 2; k++){
+    for (int k = 0; k < 2; k++){
+        double f;
+        if (k == 0){
+            f = 0.58;
+        }
+        else {
+            f = 0.23;
+        }
+        for (int j = 0; j < 3; j++){
 			int i = 3 * k + j;
-            map[i] = CCMenuItemImage::create(path + mapName[i] + ".png", path + mapName[i] + "_selected.png");
+            Sprite *sprite = Sprite::create(path + mapName[i] + ".png");
+            sprite->setScale(0.5f, 0.5f);
+            map[i] = CCMenuItemImage::create(path + mapName[i] + "zhizhan.png", path + mapName[i] + "zhizhan_selected.png");
             map[i]->setScale(0.5f, 0.5f);
-            map[i]->setPosition(ccp(visibleSize.width * 0.25 * (j + 1), visibleSize.height * 0.32 * (2 - k)));
+            sprite->setPosition(ccp(visibleSize.width * 0.3 * j + 280, visibleSize.height * f - 50));
+            map[i]->setPosition(ccp(visibleSize.width * 0.3 * j + 280, visibleSize.height * f + 80));
+            this->addChild(sprite);
             this->addChild(map[i], 1);
             _eventDispatcher->addEventListenerWithSceneGraphPriority(listener->clone(), map[i]);
         }
@@ -125,6 +135,7 @@ void ChooseMap::startGame(Ref* pSender){
         }
     }
     if (count == 1){
+        XMLParser::map_id = p[0] - '0';
         auto scene = GameStartScene::create();
         CCString *str = CCString::create(s + p);
         CCNotificationCenter::sharedNotificationCenter()->postNotification("StartMessage", str);

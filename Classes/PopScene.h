@@ -20,6 +20,7 @@ public:
     void setAnimation(string);
     void setBg(string, int, int);
     void setContent(string, int, int);
+    void removeContent();
 private:
     ////设置对话框的title
     void setTitle();

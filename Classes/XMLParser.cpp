@@ -1,4 +1,5 @@
 #include "XMLParser.h"
+int XMLParser::map_id = -1;
 string XMLParser::parseXML(const char *key, const int index){
     const char *fileName = "config/strings.xml";
     string filePath = cocos2d::FileUtils::getInstance()->fullPathForFilename(fileName);

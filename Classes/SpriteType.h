@@ -26,17 +26,17 @@ private:
 	double initial_D_defense;//ﾎ・昞ﾀﾓ・
 	double initial_P_defense;//ﾄｧｷｨｷﾀﾓ・
 
-	double x;//xﾗ・
-	double y;//yﾗ・
+	int x;//xﾗ・
+	int y;//yﾗ・
 
 public:
 	SpriteType();
 	SpriteType(string name_, double fight_type_, double life_, double magic_, double D_attack_, double P_attack_, double D_defense_, double P_defense_);//ｴ貊ｾﾊﾔ
-	void set_position(double x_, double y_);//ｴ贐・
+	void set_position(int x_, int y_);//ｴ贐・
 
 	//ｷｵｻﾘﾋ靹ｵ
-	double get_x();
-	double get_y();
+	int get_x();
+	int get_y();
 	string get_name();
 	double get_fight_type();
 	double get_life();

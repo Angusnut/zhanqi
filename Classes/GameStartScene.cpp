@@ -7,7 +7,7 @@ unsigned int flag = 0;//0----wait for click hero, 1----clicked hero,wait for mov
 position last_touch;
 bool isempty;
 vector<position> enemy_pos;
-int AIflag = 0;//-1----no AI, 0----AI player1, 1---AI player2, 2---both AI
+//int AIflag = -1;//-1----no AI, 0----AI player1, 1---AI player2, 2---both AI
 int win = 0; //1----player1 win, 2----player2 win
 vector<position> last_pos;
 vector<position> last_a_pos;
@@ -29,6 +29,7 @@ GameStartScene::~GameStartScene(){
 }
 bool GameStartScene::init()
 {
+    AIflag = -1;
 	MAP = new G_Map(18, 12, 64, 64);
 	SimpleAudioEngine::sharedEngine()->preloadBackgroundMusic("battle.wma");
 	//开始播放背景音乐，true表示循环
@@ -113,8 +114,6 @@ bool GameStartScene::init()
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener1->clone(), music);	
     return loadMap();
 }
-bool doubleClick = false;
-bool doubleClicked = false;
 bool GameStartScene::loadMap(){
     bool bRct = false;
     do
@@ -136,6 +135,8 @@ bool GameStartScene::loadMap(){
     scheduleUpdate();
     return bRct;
 }
+bool doubleClick = false;
+bool doubleClicked = false;
 bool GameStartScene::onTouchBegan(Touch *touch, Event *unused_event)
 {
     auto touch_location = touch->getLocation();
@@ -270,12 +271,14 @@ void GameStartScene::getArray(CCObject* obj){
             heros = "DEFGHIJKLM:;<=>?@ABC";
         }
         s = heros + s;
-        AIflag = 2;
+        AIflag = 1;
     }
     restart = s;
     addSprite(s);
 }
 void GameStartScene::addSprite(string s){
+    herolist_1.clear();
+    herolist_2.clear();
     Size visibleSize = Director::getInstance()->getVisibleSize();
     char *mapNameList[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling" };
     int index = s[20] - '0';
@@ -299,63 +302,81 @@ void GameStartScene::addSprite(string s){
         MAP->put_hero_on_pos(s, position(16, j + 1));
     }
 }
+
 void GameStartScene::new_addSprite()
 {
-	archive x;
-	herolist_1 = x.open_archive(0);
-	herolist_2 = x.open_archive(10);
-	map_id = x.get_map();
-	AIflag = 2;
+	//archive x;
+    int sum1 = 0, sum2 = 0;
+	herolist_1.clear();
+	herolist_2.clear();
+    herolist_1 = archive::open_archive(0);
+    herolist_2 = archive::open_archive(10);
+    map_id = archive::get_map();
+	AIflag = archive::get_flag();
 	Size visibleSize = Director::getInstance()->getVisibleSize();
 	char *mapNameList[6] = { "chibi", "guandu", "hanzhong", "hulaoguan", "xuzhou", "yiling" };
 
-	int index = x.get_map();
+	int index = map_id;
 	mapName = mapNameList[index];
 	auto *name = CCSprite::create(path + mapName + "_column.png");
 	name->setPosition(ccp(107, visibleSize.height - 200));
 	this->addChild(name);
 	for (int i = 0; i < 10; i++){
+        log("herolist_1.size : %d", herolist_1.size());
 		string heroname = herolist_1[i]->get_type().get_name();
-		GameSprite* s = GameSprite::create(heroname, 1);
-		s->get_type().change_life(herolist_1[i]->get_type().get_life());
-		s->get_type().change_magic(herolist_1[i]->get_type().get_magic());
-		s->get_type().set_position(herolist_1[i]->get_type().get_x(), herolist_1[i]->get_type().get_y());
+        GameSprite* s = herolist_1[i];
+        if (s->get_type().get_life() < 0) continue;
+        sum1++;
 		s->setTag(i);
-		MAP->put_hero_on_pos(s, position(1, i + 1));
+        log("meiyouwentizhaojingcha");
+		int hero_x = herolist_1[i]->get_type().get_x();
+		int hero_y = herolist_1[i]->get_type().get_y();
+		MAP->put_hero_on_pos(s, position(hero_x, hero_y));
 	}
-
+    count_1 = sum1;
 	for (int j = 0; j < 10; j++){
 		string heroname = herolist_2[j]->get_type().get_name();
-		GameSprite* s = GameSprite::create(heroname, 2);
-		s->get_type().change_life(herolist_2[j]->get_type().get_life());
-		s->get_type().change_magic(herolist_2[j]->get_type().get_magic());
-		s->get_type().set_position(herolist_2[j]->get_type().get_x(), herolist_2[j]->get_type().get_y());
-		s->setTag(j);
-		MAP->put_hero_on_pos(s, position(16, j + 1));
+        GameSprite* s = herolist_2[j];
+        if (s->get_type().get_life() < 0) continue;
+        sum2++;
+		s->setTag(j + 10);
+		int hero_x = herolist_2[j]->get_type().get_x();
+		int hero_y = herolist_2[j]->get_type().get_y();
+		MAP->put_hero_on_pos(s, position(hero_x, hero_y));
 	}
+    count_2 = sum2;
 	
 }
 void GameStartScene::saveGame(Ref* pSender){
+    string s = XMLParser::parseXML("hintStrings", 11);
+    CCLabelTTF* pLabel = CCLabelTTF::create(s, "【朦胧补】水黑体", 27);
+    Size visibleSize = Director::getInstance()->getVisibleSize();
+    pLabel->setPosition(ccp(80, 55));
+    pLabel->setName("hint");
+    this->addChild(pLabel);
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
 	archive x;
-	x.save_archive(herolist_1, map_id, 1);
-	x.save_archive(herolist_2, map_id, 0);
+    log("x:::%d", herolist_1.size());
+	x.save_archive(herolist_1, map_id, 1, AIflag);
+	x.save_archive(herolist_2, map_id, 0, AIflag);
+    scheduleOnce(schedule_selector(GameStartScene::removeHint), 5.0f);
+}
+void GameStartScene::removeHint(float delay){
+    if (this->getChildByName("hint")){
+        this->removeChildByName("hint");
+    }
 }
 void GameStartScene::loadGame(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
-
-
 	PopScene* pop = PopScene::create();
 	pop->setBg("images/popup/popWindow.png", -1, -1);
 	pop->setPosition(ccp(0, 20));
-	pop->setContent(5);
+	pop->setContent(8);
 	pop->noButton(1);
 	pop->yesButton(4);
 	//this->setTouchEnabled(false)
 	Director::getInstance()->getEventDispatcher()->pauseEventListenersForTarget(this, true);
 	this->addChild(pop, 6);
-
-
 }
 void GameStartScene::help(Ref* pSender){
     SimpleAudioEngine::sharedEngine()->playEffect("anniu.wav", false);//开始播放背景音效，false表示不循环
@@ -377,10 +398,11 @@ void GameStartScene::backToMenu(Ref* pSender){
     pop->setPosition(ccp(0, 20));
     pop->setContent(5);
     pop->noButton(1);
-    pop->yesButton(4);
+    pop->yesButton(0);
     //this->setTouchEnabled(false)
     Director::getInstance()->getEventDispatcher()->pauseEventListenersForTarget(this, true);
     this->addChild(pop, 6);
+
 }
 void GameStartScene::menuCloseCallback(Ref* pSender)
 {
@@ -392,6 +414,8 @@ void GameStartScene::menuCloseCallback(Ref* pSender)
 #endif
 }
 void GameStartScene::switchPlayer(Ref* pSender) {
+    SimpleAudioEngine::sharedEngine()->preloadEffect("voice/round_end.wav");
+    SimpleAudioEngine::sharedEngine()->playEffect("voice/round_end.wav", false);
 	if (player == 0) {
 		player = 1;
 	}

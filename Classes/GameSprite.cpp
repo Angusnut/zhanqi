@@ -38,6 +38,8 @@ GameSprite::GameSprite()
 
 	type = SpriteType("sample", 1, 0, 0, 0, 0, 0, 0);
 	state = SpriteState::NONE;
+    double random(double, double);
+    srand(unsigned(time(0)));
 
 }
 GameSprite::GameSprite(string name_)
@@ -289,13 +291,27 @@ void GameSprite::attackAnimation(int tag, int flag){
     CCLOG(this->get_type().get_name().c_str());
     Sequence *seq = Sequence::create(animation1, animation2, NULL);
     this->runAction(seq);
+    CCLOG("random : %d", rand);
+    string s = "";
+    s += "voice/attack";
+    s += int(random(1, 6)) + '0';
+    s += ".wav";
+    SimpleAudioEngine::sharedEngine()->preloadEffect(s.c_str());
+    SimpleAudioEngine::sharedEngine()->playEffect(s.c_str(), false);//开始播放背景音效，false表示不循环
 }
-void GameSprite::deadAnimation(){
+double random(double start, double end)
+{
+    return start + (end - start)*rand() / (RAND_MAX + 1.0);
+}
+void GameSprite::deadAnimation(string str){
     Animate *animation;
     this->stopAllActions();
     animation = HeroAnimation::setAnimate(1, 4, this->get_type().get_name(), "dead");
-    CCLOG(this->get_type().get_name().c_str());
     this->runAction(animation);
+    string s = "voice/die_" + str + ".wav";
+    CCLOG(s.c_str());
+    SimpleAudioEngine::sharedEngine()->preloadEffect(s.c_str());
+    SimpleAudioEngine::sharedEngine()->playEffect(s.c_str(), false);   
 }
 SpriteType& GameSprite::get_type() {
 	return type;
@@ -319,7 +335,6 @@ GameSprite* GameSprite::create(string heroName, int player){
 	CC_SAFE_DELETE(sprite);
 	return nullptr;
 }
-
 BloodProgress* GameSprite::get_blood() {
 	return blood;
 }

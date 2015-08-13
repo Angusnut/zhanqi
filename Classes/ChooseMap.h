@@ -24,6 +24,7 @@ public:
     void getArray(cocos2d::CCObject* obj);
     void storymode(cocos2d::CCObject* obj);
     void startGame(cocos2d::Ref* pSender);
+    void function();
     // implement the "static create()" method manually
     CREATE_FUNC(ChooseMap);
 };
